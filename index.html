@@ -504,7 +504,7 @@
           </div>
         </div>
         <div class="form-block w-form">
-          <form id="email-form" name="email-form" data-name="Email Form" redirect="form-submited" data-redirect="form-submited" action="https://formspree.io/f/meajazbg" method="POST" class="form-2" data-wf-page-id="6a1a1b3f657185ff734ba0dd" data-wf-element-id="14f40322-db24-d9ed-5a0b-ea06983ea4c9">
+          <form id="email-form" name="email-form" data-name="Email Form" action="https://formspree.io/f/meajazbg" method="POST" class="form-2" data-wf-page-id="6a1a1b3f657185ff734ba0dd" data-wf-element-id="14f40322-db24-d9ed-5a0b-ea06983ea4c9">
             <div class="div-block-10">
               <div class="div-form"><label for="name" class="field-label">Name</label><input class="text-field w-input" maxlength="256" name="name" data-name="Name" placeholder="Your full name" autocomplete="name" type="text" id="name" required=""><label for="Email" class="field-label">Email</label><input class="text-field w-input" maxlength="256" name="Email" data-name="Email" placeholder="you@company.com" autocomplete="email" type="email" id="Email" required=""><label for="Phone" class="field-label">Phone</label><input class="text-field w-input" maxlength="256" name="Phone" data-name="Phone" placeholder="e.g., +1 (415) 555-0123" autocomplete="tel" type="tel" id="Phone" required=""><label for="Company" class="field-label">Company</label><input class="text-field w-input" maxlength="256" name="Company" data-name="Company" placeholder="Your company or organization" autocomplete="organization" type="text" id="Company" required=""></div>
               <div class="div-form"><label for="event-date" class="field-label">Event Date</label><input class="text-field w-input" name="Event-Date" data-name="Event Date" type="date" id="event-date" required=""><label for="Event-Type" class="field-label">Event Type</label><select id="Event-Type" name="Event-Type" data-name="Event Type" required="" class="text-field w-select">
@@ -571,6 +571,43 @@
   <script>
   const eventDate = document.getElementById('event-date');
   if (eventDate) eventDate.type = 'date';
+</script>
+  <script>
+(function () {
+  const form = document.getElementById('email-form');
+  if (!form) return;
+  const button = form.querySelector('[type="submit"]');
+  const error = form.parentElement.querySelector('.w-form-fail');
+  let sending = false;
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (sending || !form.reportValidity()) return;
+    sending = true;
+    const originalLabel = button.value;
+    button.disabled = true;
+    button.value = 'Sending...';
+    if (error) error.style.display = 'none';
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' }
+      });
+      if (!response.ok) throw new Error('Submission failed');
+      window.location.assign('form-submited.html');
+    } catch (failure) {
+      if (error) {
+        error.textContent = 'We could not confirm your submission. Please try again. Your answers have been kept.';
+        error.setAttribute('role', 'alert');
+        error.style.display = 'block';
+      }
+      sending = false;
+      button.disabled = false;
+      button.value = originalLabel;
+    }
+  });
+})();
 </script>
 </body>
 </html>
